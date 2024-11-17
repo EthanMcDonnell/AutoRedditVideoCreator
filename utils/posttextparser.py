@@ -30,6 +30,7 @@ def posttextparser(obj, *, tried: bool = False) -> List[str]:
 
     for line in doc.sents:
         if sanitize_text(line.text):
+            print(line.text)
             newtext.append(line.text)
 
     return newtext

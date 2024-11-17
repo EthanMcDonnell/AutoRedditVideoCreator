@@ -63,6 +63,7 @@ def get_screenshots_of_reddit_posts(reddit_object: dict, screenshot_num: int):
         # for idx,item in enumerate(reddit_object["thread_post"]):
         print_substep("Generating images...")
         return imagemaker(
+            font_name=settings.config["settings"]["text_font"],
             theme=bgcolor,
             reddit_obj=reddit_object,
             txtclr=txtcolor,

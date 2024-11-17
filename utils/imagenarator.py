@@ -53,7 +53,7 @@ def draw_multiple_line_text(
         y += line_height + padding
 
 
-def imagemaker(theme, reddit_obj: dict, txtclr, padding=5, transparent=False) -> None:
+def imagemaker(font_name, theme, reddit_obj: dict, txtclr, padding=5, transparent=False) -> None:
     """
     Render Images for video
     """
@@ -61,9 +61,9 @@ def imagemaker(theme, reddit_obj: dict, txtclr, padding=5, transparent=False) ->
     id = re.sub(r"[^\w\s-]", "", reddit_obj["thread_id"])
 
     if transparent:
-        font = ImageFont.truetype(os.path.join("fonts", "Roboto-Bold.ttf"), 100)
+        font = ImageFont.truetype(os.path.join("fonts", f"{font_name}.ttf"), 100)
     else:
-        font = ImageFont.truetype(os.path.join("fonts", "Roboto-Regular.ttf"), 100)
+        font = ImageFont.truetype(os.path.join("fonts", f"{font_name}.ttf"), 100)
     size = (1920, 1080)
 
     image = Image.new("RGBA", size, theme)

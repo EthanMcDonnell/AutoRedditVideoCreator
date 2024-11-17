@@ -248,9 +248,14 @@ def make_final_video(
             float(ffmpeg.probe(f"assets/temp/{reddit_id}/mp3/title.mp3")["format"]["duration"]),
         )
     audio_concat = ffmpeg.concat(*audio_clips, a=1, v=0)
-    ffmpeg.output(
-        audio_concat, f"assets/temp/{reddit_id}/audio.mp3", **{"b:a": "192k"}
-    ).overwrite_output().run(quiet=True)
+
+
+    # Create the filtergraph: Apply the volume filter directly to the complex graph
+    audio = ffmpeg.filter(audio_concat, 'volume', volume=settings.config["settings"]["speech_volume_factor"])
+
+    # Output the processed audio
+    ffmpeg.output(audio, f"assets/temp/{reddit_id}/audio.mp3", **
+                {"b:a": "192k"}).overwrite_output().run(quiet=True)
 
     console.log(f"[bold green] Video Will Be: {length} Seconds Long")
 
@@ -290,7 +295,7 @@ def make_final_video(
             float(
                 ffmpeg.probe(f"assets/temp/{reddit_id}/mp3/postaudio-{i}.mp3")["format"]["duration"]
             )
-            for i in range(number_of_clips)
+            for i in range(number_of_clips+1)
         ]
         audio_clips_durations.insert(
             0,
@@ -311,7 +316,18 @@ def make_final_video(
             )
             current_time += audio_clips_durations[0]
         elif settings.config["settings"]["storymodemethod"] == 1:
-            for i in track(range(0, number_of_clips + 1), "Collecting the image files..."):
+            background_clip = background_clip.overlay(
+                image_clips[0],
+                enable=f"between(t,{current_time},{current_time + audio_clips_durations[0]})",
+                x=f"(main_w-overlay_w)/{settings.config['settings']['text_x_division_movement_factor']}",
+                y=f"(main_h-overlay_h)/{settings.config['settings']['text_y_division_movement_factor']}",
+            )
+            # Remove title clip, title audio, audio durations
+            current_time += audio_clips_durations[0]
+            audio_clips_durations = audio_clips_durations[1:]
+            audio_clips = audio_clips[1:]
+            image_clips = image_clips[1:]
+            for i in track(range(0, number_of_clips+1), "Collecting the image files..."):
                 image_clips.append(
                     ffmpeg.input(f"assets/temp/{reddit_id}/png/img{i}.png")["v"].filter(
                         "scale", screenshot_width, -1
@@ -320,8 +336,8 @@ def make_final_video(
                 background_clip = background_clip.overlay(
                     image_clips[i],
                     enable=f"between(t,{current_time},{current_time + audio_clips_durations[i]})",
-                    x="(main_w-overlay_w)/2",
-                    y="(main_h-overlay_h)/2",
+                    x=f"(main_w-overlay_w)/{settings.config['settings']['text_x_division_movement_factor']}",
+                    y=f"(main_h-overlay_h)/{settings.config['settings']['text_y_division_movement_factor']}",
                 )
                 current_time += audio_clips_durations[i]
     else:
@@ -338,8 +354,8 @@ def make_final_video(
             background_clip = background_clip.overlay(
                 image_overlay,
                 enable=f"between(t,{current_time},{current_time + audio_clips_durations[i]})",
-                x="(main_w-overlay_w)/2",
-                y="(main_h-overlay_h)/2",
+                x=f"(main_w-overlay_w)/{settings.config['settings']['text_x_division_movement_factor']}",
+                y=f"(main_h-overlay_h)/{settings.config['settings']['text_y_division_movement_factor']}",
             )
             current_time += audio_clips_durations[i]
 
@@ -480,3 +496,4 @@ def make_final_video(
     cleanups = cleanup(reddit_id)
     print_substep(f"Removed {cleanups} temporary files 🗑")
     print_step("Done! 🎉 The video is in the results folder 📁")
+    return defaultPath + f"/{filename}.mp4"

@@ -59,7 +59,6 @@ def main(POST_ID=None) -> None:
     chop_background(bg_config, length, reddit_object)
     make_final_video(number_of_comments, length, reddit_object, bg_config)
 
-
 def run_many(times) -> None:
     for x in range(1, times + 1):
         print_step(

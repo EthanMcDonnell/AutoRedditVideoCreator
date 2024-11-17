@@ -1,0 +1,12 @@
+services:
+  reddit-video-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: reddit-vid-container
+    volumes:
+      - .:/app  # Mount the current directory to the /app directory in the container
+    environment:
+      - PYTHONUNBUFFERED=1  # Optional, to get real-time output
+    stdin_open: true  # Keep stdin open to allow user input
+    tty: true         # Allocate a pseudo-TTY

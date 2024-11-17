@@ -1,12 +1,16 @@
 FROM python:3.10.14-slim
 
-RUN apt update
-RUN apt-get install -y ffmpeg
-RUN apt install python3-pip -y
+RUN apt update && \
+apt-get install -y ffmpeg &&\
+apt-get clean
 
-RUN mkdir /app
-ADD . /app
+COPY requirements.txt app/requirements.txt
 WORKDIR /app
+
+
+RUN pip install --upgrade pip 
 RUN pip install -r requirements.txt
+
+
 
 CMD ["python3", "main.py"]
